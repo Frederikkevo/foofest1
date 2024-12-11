@@ -1,13 +1,15 @@
+"use client";
+
 import { useEffect, useState } from "react";
 
 const ReservationTimer = ({ duration, onTimeout }) => {
   const [timeLeft, setTimeLeft] = useState(duration);
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
-          clearInterval(interval);
+          clearInterval(timer);
           onTimeout();
           return 0;
         }
@@ -15,14 +17,16 @@ const ReservationTimer = ({ duration, onTimeout }) => {
       });
     }, 1000);
 
-    return () => clearInterval(interval);
+    return () => clearInterval(timer);
   }, [onTimeout]);
 
-  return (
-    <div>
-      <h3 className="text-lg">Time left: {timeLeft}s</h3>
-    </div>
-  );
+  const formatTime = () => {
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  };
+
+  return <div className="text-red-500">Time left: {formatTime()}</div>;
 };
 
 export default ReservationTimer;

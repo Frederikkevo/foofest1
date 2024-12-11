@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 
 const AreaSelector = ({ onSelect }) => {
@@ -25,7 +27,10 @@ const AreaSelector = ({ onSelect }) => {
         min={1}
         className="border p-2 m-2"
       />
-      <button onClick={handleSubmit} className="bg-blue-500 text-white p-2 rounded">
+      <button
+        onClick={handleSubmit}
+        className="bg-blue-500 text-white p-2 rounded"
+      >
         Reserve
       </button>
     </div>
