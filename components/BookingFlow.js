@@ -1,160 +1,49 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import ProgressBar from "./ProgressBar";
-import ReservationTimer from "./ReservationTimer";
-import { getAvailableSpots, reserveSpot, fullfillReservation } from "../api/apiClient";
+import React, { useState, useEffect } from 'react';
+import TicketSelector from './TicketSelector';
+import CampingOptions from './CampingOptions';
+import PersonalInfoForm from './PersonalInfoForm';
 
 const BookingFlow = () => {
-  const [step, setStep] = useState(1);
-  const [availableSpots, setAvailableSpots] = useState([]);
-  const [selectedArea, setSelectedArea] = useState("");
-  const [tickets, setTickets] = useState(1);
-  const [ticketType, setTicketType] = useState("regular");
-  const [options, setOptions] = useState({
-    greenCamping: false,
-    tent2Person: 0,
-    tent3Person: 0,
-  });
-  const [reservationId, setReservationId] = useState(null);
-  const [personalInfo, setPersonalInfo] = useState([]);
-  const [timeout, setTimeout] = useState(false);
-
-  const ticketPrices = {
-    regular: 799,
-    vip: 1299,
-  };
+  const [tickets, setTickets] = useState({ regular: 0, vip: 0 });
+  const [campingOption, setCampingOption] = useState({});
+  const [personalInfo, setPersonalInfo] = useState({});
 
   useEffect(() => {
-    const fetchSpots = async () => {
-      try {
-        const spots = await getAvailableSpots();
-        setAvailableSpots(spots);
-      } catch (error) {
-        console.error("Failed to fetch available spots");
-      }
-    };
-    fetchSpots();
+    // Initialization or fetching operations here
   }, []);
 
-  const handleReserve = async () => {
-    try {
-      const response = await reserveSpot({ area: selectedArea, amount: tickets });
-      setReservationId(response.id);
-      setStep(2);
-    } catch (error) {
-      console.error("Error reserving spot");
-    }
+  const handleTicketsUpdate = (newTickets) => {
+    setTickets(newTickets);
   };
 
-  const handleFullfill = async () => {
-    try {
-      await fullfillReservation(reservationId);
-      alert("Reservation completed!");
-      setStep(1);
-    } catch (error) {
-      console.error("Error fulfilling reservation");
-    }
+  const handleCampingOptionChange = (option, price) => {
+    setCampingOption({ ...campingOption, [option]: price });
   };
 
-  const handleTimeout = () => {
-    alert("Reservation timed out!");
-    setTimeout(true);
-    setStep(1);
+  const handlePersonalInfoSubmit = (info) => {
+    setPersonalInfo(info);
   };
 
-  const calculateTotalPrice = () => {
-    const ticketPrice = tickets * ticketPrices[ticketType];
-    const greenCampingPrice = options.greenCamping ? 249 : 0;
-    const tentPrice =
-      options.tent2Person * 299 + options.tent3Person * 399;
-    return ticketPrice + greenCampingPrice + tentPrice + 99; // Fixed booking fee
+  const handleReservation = async () => {
+    const response = await fetch('https://hill-mirror-era.glitch.me/reserve-spot', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ area: 'Alfheim', amount: tickets.regular + tickets.vip }),
+    });
+    const data = await response.json();
+    console.log(data); // Log to check the reservation ID and status
   };
 
   return (
-    <div>
-      <ProgressBar step={step} totalSteps={4} />
-
-      {timeout ? (
-        <div className="text-red-500">Session expired. Please restart.</div>
-      ) : (
-        <>
-          {step === 1 && (
-            <div>
-              <h2>Select Area and Tickets</h2>
-              <select
-                value={selectedArea}
-                onChange={(e) => setSelectedArea(e.target.value)}
-              >
-                <option value="">Select an area</option>
-                {availableSpots.map((spot) => (
-                  <option key={spot.id} value={spot.area}>
-                    {spot.area} ({spot.spotsLeft} spots left)
-                  </option>
-                ))}
-              </select>
-              <div>
-                <label>
-                  <input
-                    type="radio"
-                    value="regular"
-                    checked={ticketType === "regular"}
-                    onChange={(e) => setTicketType(e.target.value)}
-                  />
-                  Regular Ticket (799,-)
-                </label>
-                <label>
-                  <input
-                    type="radio"
-                    value="vip"
-                    checked={ticketType === "vip"}
-                    onChange={(e) => setTicketType(e.target.value)}
-                  />
-                  VIP Ticket (1299,-)
-                </label>
-              </div>
-              <input
-                type="number"
-                value={tickets}
-                onChange={(e) => setTickets(Number(e.target.value))}
-                min={1}
-              />
-              <button onClick={handleReserve}>Reserve Spot</button>
-            </div>
-          )}
-
-          {step === 2 && (
-            <div>
-              <h2>Enter Personal Info</h2>
-              {Array.from({ length: tickets }).map((_, index) => (
-                <div key={index}>
-                  <input
-                    type="text"
-                    placeholder={`Name for Ticket ${index + 1}`}
-                    onChange={(e) =>
-                      setPersonalInfo((prev) => {
-                        const info = [...prev];
-                        info[index] = e.target.value;
-                        return info;
-                      })
-                    }
-                  />
-                </div>
-              ))}
-              <button onClick={() => setStep(3)}>Next</button>
-            </div>
-          )}
-
-          {step === 3 && (
-            <div>
-              <h2>Confirm and Pay</h2>
-              <ReservationTimer duration={300} onTimeout={handleTimeout} />
-              <p>Total Price: {calculateTotalPrice()} DKK</p>
-              <button onClick={handleFullfill}>Pay and Confirm</button>
-            </div>
-          )}
-        </>
-      )}
+    <div className="booking-flow">
+      <TicketSelector updateTickets={handleTicketsUpdate} />
+      <CampingOptions onCampingOptionChange={handleCampingOptionChange} />
+      <PersonalInfoForm onSubmit={handlePersonalInfoSubmit} />
+      <button onClick={handleReservation}>Reserve Spot</button>
     </div>
   );
 };

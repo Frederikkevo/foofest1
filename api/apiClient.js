@@ -1,40 +1,27 @@
-import axios from "axios";
+const API_BASE_URL = 'https://hill-mirror-era.glitch.me';
 
-const apiClient = axios.create({
-  baseURL: "https://daviatkea.github.io/FooFest-Exam-API",
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-export const getAvailableSpots = async () => {
-  try {
-    const response = await apiClient.get("/available-spots");
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching available spots:", error);
-    throw error;
-  }
+export const fetchAvailableSpots = async () => {
+  const response = await fetch(`${API_BASE_URL}/available-spots`);
+  if (!response.ok) throw new Error('Failed to fetch available spots');
+  return response.json();
 };
 
-export const reserveSpot = async (data) => {
-  try {
-    const response = await apiClient.put("/reserve-spot", data);
-    return response.data;
-  } catch (error) {
-    console.error("Error reserving spot:", error);
-    throw error;
-  }
+export const reserveSpot = async (area, amount) => {
+  const response = await fetch(`${API_BASE_URL}/reserve-spot`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ area, amount }),
+  });
+  if (!response.ok) throw new Error('Failed to reserve spot');
+  return response.json();
 };
 
-export const fullfillReservation = async (id) => {
-  try {
-    const response = await apiClient.post("/fullfill-reservation", { id });
-    return response.data;
-  } catch (error) {
-    console.error("Error fulfilling reservation:", error);
-    throw error;
-  }
+export const fulfillReservation = async (id) => {
+  const response = await fetch(`${API_BASE_URL}/fullfill-reservation`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id }),
+  });
+  if (!response.ok) throw new Error('Failed to fulfill reservation');
+  return response.json();
 };
-
-export default apiClient;
