@@ -1,21 +1,18 @@
 "use client";
 
-import React from 'react';
-import Head from 'next/head';
-import BookingFlow from '../../components/BookingFlow';
+import React from "react";
+import BookingFlow from "../../components/BookingFlow";
+import Header from "../../components/Header";
+import Footer from "../../components/Footer";
 
 export default function Home() {
   return (
-    <div>
-      <Head>
-        <title>Foofest Booking System</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <main className="p-8">
-        <h1 className="text-4xl font-bold text-center mb-6">Welcome to Foofest!</h1>
+    <div className="min-h-screen bg-orange-50">
+      <Header/>
+      <main className="flex flex-col items-center p-8">
         <BookingFlow />
       </main>
+      <Footer/>
     </div>
   );
 }
-

@@ -1,49 +1,46 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import TicketSelector from './TicketSelector';
-import CampingOptions from './CampingOptions';
-import PersonalInfoForm from './PersonalInfoForm';
+import React, { useState } from "react";
+import TicketSelector from "./TicketSelector";
+import CampingOptions from "./CampingOptions";
+import PersonalInfoForm from "./PersonalInfoForm";
+import Cart from "./Cart";
 
 const BookingFlow = () => {
-  const [tickets, setTickets] = useState({ regular: 0, vip: 0 });
-  const [campingOption, setCampingOption] = useState({});
-  const [personalInfo, setPersonalInfo] = useState({});
+  const [cartItems, setCartItems] = useState([]);
+  const [campingFee, setCampingFee] = useState(false);
 
-  useEffect(() => {
-    // Initialization or fetching operations here
-  }, []);
-
-  const handleTicketsUpdate = (newTickets) => {
-    setTickets(newTickets);
+  const handleAddToCart = (item) => {
+    setCartItems((prev) => [...prev, item]);
   };
 
-  const handleCampingOptionChange = (option, price) => {
-    setCampingOption({ ...campingOption, [option]: price });
-  };
-
-  const handlePersonalInfoSubmit = (info) => {
-    setPersonalInfo(info);
-  };
-
-  const handleReservation = async () => {
-    const response = await fetch('https://hill-mirror-era.glitch.me/reserve-spot', {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ area: 'Alfheim', amount: tickets.regular + tickets.vip }),
-    });
-    const data = await response.json();
-    console.log(data); // Log to check the reservation ID and status
+  const handleRemoveFromCart = (indexToRemove) => {
+    setCartItems((prev) => prev.filter((_, index) => index !== indexToRemove));
   };
 
   return (
-    <div className="booking-flow">
-      <TicketSelector updateTickets={handleTicketsUpdate} />
-      <CampingOptions onCampingOptionChange={handleCampingOptionChange} />
-      <PersonalInfoForm onSubmit={handlePersonalInfoSubmit} />
-      <button onClick={handleReservation}>Reserve Spot</button>
+    <div className="flex w-full max-w-6xl">
+      {/* Left Section */}
+      <div className="w-2/3 pr-4">
+        <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
+          <TicketSelector onAddToCart={handleAddToCart} />
+        </div>
+        <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
+          <CampingOptions onAddToCart={handleAddToCart} setCampingFee={setCampingFee} />
+        </div>
+        <div className="bg-white shadow-lg rounded-lg p-6">
+          <PersonalInfoForm />
+        </div>
+      </div>
+
+      {/* Right Section: Cart */}
+      <div className="w-1/3 bg-gray-100 shadow-lg rounded-lg p-6">
+        <Cart
+          cartItems={cartItems}
+          campingFee={campingFee}
+          onRemoveFromCart={handleRemoveFromCart}
+        />
+      </div>
     </div>
   );
 };
